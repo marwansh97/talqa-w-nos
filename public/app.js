@@ -26,6 +26,7 @@ function render(){
  s.players.forEach((p,i)=>{html+='<div class="player">'+esc(p.name)+(i===s.me?t(' (you)',' (إنت)'):'')+' <span class="hp">'+(s.phase==='lobby'?'':('♥'.repeat(p.hp)||t('Out','خرج')))+'</span> '+(active&&mine&&p.hp?button('shoot',t('Fire','اضرب'),'data-target="'+i+'"'):'')+'</div>';});
  if(!active && s.me===0)html+=button('start',s.phase==='done'?t('Rematch','العب تاني'):t('Start match','ابدأ اللعب'),s.players.length<2?'disabled':'');
  screen.innerHTML=html;
+ if(active && s.last){const reveal=screen.querySelector('h2 + p + p');if(reveal)reveal.classList.add('reveal');}
 }
 async function call(action,target){
  if(busy)return;busy=true;
