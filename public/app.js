@@ -17,13 +17,15 @@ function render(){
  let html='<small>'+t('ROOM','الأوضة')+' <b class="code">'+esc(s.code)+'</b></small>';
  if(s.phase==='lobby') html+='<h2>'+t('Gather your crew','لمّ الشلة')+'</h2>'+button('invite',t('Copy invite link','انسخ لينك الدعوة'),'class="alt"');
  if(active){
+ const slots=Number(s.live)+Number(s.blank);
+ html+='<div class="drum" aria-hidden="true"><span>✦</span>'+Array.from({length:6},(_,i)=>'<i class="'+(i<slots?'loaded':'spent')+'" style="--i:'+i+'"></i>').join('')+'</div>';
  html+='<h2>'+(mine?t('Your turn','دورك'):esc(s.players[s.turn].name)+' · '+t('playing','بيلعب'))+'</h2><p>'+t('Load','تعميرة')+' '+s.round+' · '+s.live+' '+t('live','حي')+' / '+s.blank+' '+t('blank','فشنك')+(s.boost?' · ×2':'')+'</p>';
  if(s.last)html+='<p>'+esc(s.players[s.last.me].name)+' → '+esc(s.players[s.last.target].name)+' · '+(s.last.live?t('Live hit','طلقة حي'):t('Blank','فشنك'))+'</p>';
  if(mine){html+='<p>'+s.tools.map(tool=>button(tool,tools()[tool],'class="alt"')).join(' ')+'</p>';
  if(s.peek!==null)html+='<p>'+t('Lens reveals','العدسة كشفت')+' · '+(s.peek?t('Live','حي'):t('Blank','فشنك'))+'</p>';}
  }
  if(s.phase==='done')html+='<h2>'+esc(s.players.find(p=>p.hp).name)+' '+t('wins!','كسب!')+'</h2>';
- s.players.forEach((p,i)=>{html+='<div class="player">'+esc(p.name)+(i===s.me?t(' (you)',' (إنت)'):'')+' <span class="hp">'+(s.phase==='lobby'?'':('♥'.repeat(p.hp)||t('Out','خرج')))+'</span> '+(active&&mine&&p.hp?button('shoot',t('Fire','اضرب'),'data-target="'+i+'"'):'')+'</div>';});
+ s.players.forEach((p,i)=>{html+='<div class="player '+(active&&i===s.turn?'current':'')+'" style="--h:'+((i*47+155)%360)+'"><span class="portrait" aria-hidden="true"><i></i></span>'+esc(p.name)+(i===s.me?t(' (you)',' (إنت)'):'')+' <span class="hp">'+(s.phase==='lobby'?'':('♥'.repeat(p.hp)||t('Out','خرج')))+'</span> '+(active&&mine&&p.hp?button('shoot',t('Fire','اضرب'),'data-target="'+i+'"'):'')+'</div>';});
  if(!active && s.me===0)html+=button('start',s.phase==='done'?t('Rematch','العب تاني'):t('Start match','ابدأ اللعب'),s.players.length<2?'disabled':'');
  screen.innerHTML=html;
  if(active && s.last){const reveal=screen.querySelector('h2 + p + p');if(reveal)reveal.classList.add('reveal');}
