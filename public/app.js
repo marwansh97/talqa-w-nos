@@ -1,3 +1,4 @@
+import {showArena} from './arena.js';
 const screen=document.querySelector('#screen'), msg=document.querySelector('#msg');
 let ar=localStorage.language==='ar', state, busy=false;
 let session=JSON.parse(sessionStorage.room||'null');
@@ -5,7 +6,7 @@ const t=(en,eg)=>ar?eg:en;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 const button=(action,label,extra='')=>'<button data-action="'+action+'" '+extra+'>'+label+'</button>';
 const tools=()=>({lens:t('Lens · reveal shell','العدسة · اكشف الطلقة'),flip:t('Flip shell','اقلب الطلقة'),double:t('Double damage','ضاعف الضرر')});
-function render(){
+function render(previous=state){
  document.documentElement.lang=ar?'ar-EG':'en';document.documentElement.dir=ar?'rtl':'ltr';
  document.querySelector('#lang').textContent=ar?'English':'مصري';
  if(!state){
@@ -28,6 +29,7 @@ function render(){
  s.players.forEach((p,i)=>{html+='<div class="player '+(active&&i===s.turn?'current':'')+'" style="--h:'+((i*47+155)%360)+'"><span class="portrait" aria-hidden="true"><i></i></span>'+esc(p.name)+(i===s.me?t(' (you)',' (إنت)'):'')+' <span class="hp">'+(s.phase==='lobby'?'':('♥'.repeat(p.hp)||t('Out','خرج')))+'</span> '+(active&&mine&&p.hp?button('shoot',t('Fire','اضرب'),'data-target="'+i+'"'):'')+'</div>';});
  if(!active && s.me===0)html+=button('start',s.phase==='done'?t('Rematch','العب تاني'):t('Start match','ابدأ اللعب'),s.players.length<2?'disabled':'');
  screen.innerHTML=html;
+ if(active || s.phase==='done') showArena(screen,s,previous);
  if(active && s.last){const reveal=screen.querySelector('h2 + p + p');if(reveal)reveal.classList.add('reveal');}
 }
 async function call(action,target){
@@ -45,8 +47,8 @@ async function call(action,target){
  throw Error(next.error);
  }
  const changed=state?.rev!==next.rev||!state;
- state=next;session={code:next.code,token:next.token};sessionStorage.room=JSON.stringify(session);
- if(changed)render();msg.textContent='';
+ const previous=state;state=next;session={code:next.code,token:next.token};sessionStorage.room=JSON.stringify(session);
+ if(changed)render(previous);msg.textContent='';
  }catch(e){msg.textContent=({missing:t('Room unavailable. Check the code.','الأوضة مش موجودة. راجع الكود.'),name:t('Enter your name first.','اكتب اسمك الأول.'),closed:t('Room full or already playing.','الأوضة مليانة أو اللعب بدأ.'),wait:t('Wait for your turn or refresh.','استنى دورك أو حدّث الصفحة.')})[e.message]||t('Connection interrupted. Try again.','الاتصال اتقطع. جرّب تاني.');}finally{busy=false;}
 }
 screen.onclick=async e=>{

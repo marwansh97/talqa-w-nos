@@ -47,7 +47,7 @@ export function request(b) {
       requireRule(Number.isInteger(b.target) && target?.hp>0,'wait');
       const live=r.shells.shift();
       if(live) target.hp=Math.max(0,target.hp-(r.boost?2:1));
-      r.last={me,target:b.target,live};r.boost=false;
+      r.last={id:r.rev+1,me,target:b.target,live};r.boost=false;
       for(const player of r.players) player.peek=null;
       if(r.players.filter(x=>x.hp).length===1) r.phase='done';
       else {
